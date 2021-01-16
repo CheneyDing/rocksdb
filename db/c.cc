@@ -3756,6 +3756,7 @@ const char* rocksdb_get_cf_range_files_metadata(
   }
   meta += "]";
   Slice result(meta);
+  std::cout << "meta: " << meta << std::endl;
   return result.data();
 }
 
