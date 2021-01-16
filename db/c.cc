@@ -3710,12 +3710,12 @@ void rocksdb_delete_file_in_range_cf(
 }
 
 void rocksdb_get_cf_range_files_metadata(
-    rocksdb_t* db, rocksdb_column_family_handle_t* column_family, rocksdb_livefiles_t* files,
+    rocksdb_t* db, rocksdb_column_family_handle_t* column_family, rocksdb_livefiles_t* metadata,
     const char* start_key, size_t start_key_len, const char* limit_key,
     size_t limit_key_len, char** errptr) {
   Slice a, b;
   GetCFFilesMetaInRange(
-      db->rep, column_family->rep, files,
+      db->rep, column_family->rep, &metadata->rep,
       (start_key ? (a = Slice(start_key, start_key_len), &a) : nullptr),
       (limit_key ? (b = Slice(limit_key, limit_key_len), &b) : nullptr));
 }
