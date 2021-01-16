@@ -1931,9 +1931,6 @@ class DBImpl : public DB {
   InstrumentedCondVar atomic_flush_install_cv_;
 
   bool wal_in_db_path_;
-  Status FindFilesInRanges(ColumnFamilyHandle* column_family,
-                           const RangePtr* ranges, std::map<int>* files,
-                           size_t n, bool include_end);
 };
 
 extern Options SanitizeOptions(const std::string& db, const Options& src);
