@@ -5235,6 +5235,7 @@ void VersionSet::GetCFRangeFilesMetaData(ColumnFamilyHandle* column_family, std:
       vstorage->GetCleanInputsWithinInterval(
           i, begin_key, end_key, &level_files, -1 /* hint_index */,
           nullptr /* file_index */);
+      //vstorage->GetOverlappingInputs(i, begin_key, end_key, &level_files, -1, nullptr);
       FileMetaData* level_file;
       for (uint32_t j = 0; j < level_files.size(); j++) {
         level_file = level_files[j];
@@ -5257,7 +5258,7 @@ void VersionSet::GetCFRangeFilesMetaData(ColumnFamilyHandle* column_family, std:
           filemetadata.db_path = cfd->ioptions()->cf_paths.back().path;
         }
         filemetadata.name = MakeTableFileName("", level_file->fd.GetNumber());
-        filemetadata.level = j;
+        filemetadata.level = i;
         filemetadata.size = static_cast<size_t>(level_file->fd.GetFileSize());
         filemetadata.smallestkey = level_file->smallest.user_key().ToString();
         filemetadata.largestkey = level_file->largest.user_key().ToString();
