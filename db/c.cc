@@ -46,7 +46,7 @@
 #include <vector>
 #include <unordered_set>
 #include <map>
-#include <set>
+#include <iostream>
 
 using rocksdb::BytewiseComparator;
 using rocksdb::Cache;
@@ -3721,6 +3721,21 @@ void rocksdb_get_cf_range_files_metadata(
 
 rocksdb_livefiles_t* rocksdb_livefiles_create() {
   return new rocksdb_livefiles_t;
+}
+
+rocksdb_column_family_handle_t * rocksdb_default_column_family(rocksdb_t* db) {
+  return reinterpret_cast<rocksdb_column_family_handle_t*>(
+      db->rep->DefaultColumnFamily());
+}
+
+void rocksdb_parse_livefiles(rocksdb_livefiles_t* metadata) {
+  for (auto iter = metadata->rep.begin(); iter != metadata->rep.end(); iter++) {
+    std::cout << "\nSst metadata:\n"
+         << "name: " << (*iter).name << "\n"
+         << "smallestKey: " << (*iter).smallestkey << "\n"
+         << "largestKey: " << (*iter).largestkey << "\n"
+         << "level: " << (*iter).level << "\n" << std::endl;
+  }
 }
 
 rocksdb_transactiondb_options_t* rocksdb_transactiondb_options_create() {
