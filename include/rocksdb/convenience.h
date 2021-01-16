@@ -336,12 +336,12 @@ Status DeleteFilesInRanges(DB* db, ColumnFamilyHandle* column_family,
                            const RangePtr* ranges, size_t n,
                            bool include_end = true);
 
-Status FindFilesInRange(DB* db, ColumnFamilyHandle* column_family,
-                        const Slice* begin, const Slice* end, std::map<int, std::set<uint64_t>>* files,
+Status FindFilesInRange(DB* db, ColumnFamilyHandle* column_family, std::map<int, std::set<uint64_t>>* files,
+                        const Slice* begin, const Slice* end,
                         bool include_end = true);
 
-Status FindFilesInRanges(DB* db, ColumnFamilyHandle* column_family,
-                         const RangePtr* ranges, std::map<int, std::set<uint64_t>>* files,
+Status FindFilesInRanges(DB* db, ColumnFamilyHandle* column_family, std::map<int, std::set<uint64_t>>* files,
+                         const RangePtr* ranges,
                          size_t n, bool include_end = true);
 
 // Verify the checksum of file

@@ -32,15 +32,15 @@ Status DeleteFilesInRanges(DB* db, ColumnFamilyHandle* column_family,
       ->DeleteFilesInRanges(column_family, ranges, n, include_end);
 }
 
-Status FindFilesInRange(DB* db, ColumnFamilyHandle* column_family,
-                          const Slice* begin, const Slice* end, std::map<int, std::set<uint64_t>>* files,
+Status FindFilesInRange(DB* db, ColumnFamilyHandle* column_family, std::map<int, std::set<uint64_t>>* files,
+                          const Slice* begin, const Slice* end,
                           bool include_end) {
   RangePtr range(begin, end);
-  return FindFilesInRanges(db, column_family, &range, files, 1, include_end);
+  return FindFilesInRanges(db, column_family, files, &range, 1, include_end);
 }
 
-Status FindFilesInRanges(DB* db, ColumnFamilyHandle* column_family,
-                         const RangePtr* ranges, std::map<int, std::set<uint64_t>>* files,
+Status FindFilesInRanges(DB* db, ColumnFamilyHandle* column_family, std::map<int, std::set<uint64_t>>* files,
+                         const RangePtr* ranges,
                          size_t n, bool include_end) {
   return (static_cast_with_check<DBImpl, DB>(db->GetRootDB()))
       ->FindFilesInRanges(column_family, ranges, files, n, include_end);
