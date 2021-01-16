@@ -335,9 +335,10 @@ class DBImpl : public DB {
   Status DeleteFilesInRanges(ColumnFamilyHandle* column_family,
                              const RangePtr* ranges, size_t n,
                              bool include_end = true);
-  Status FindFilesInRanges(ColumnFamilyHandle* column_family,
-                                   const RangePtr* ranges, std::map<int, std::set<uint64_t>>* files,
-                                   size_t n, bool include_end);
+
+  void GetCFRangeFilesMetaData(ColumnFamilyHandle* column_family, std::vector<LiveFileMetaData>* metadata,
+                               const RangePtr* ranges,
+                               size_t n, bool include_end);
 
   virtual void GetLiveFilesMetaData(
       std::vector<LiveFileMetaData>* metadata) override;

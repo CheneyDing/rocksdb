@@ -5202,6 +5202,78 @@ Status VersionSet::GetMetadataForFile(uint64_t number, int* filelevel,
   return Status::NotFound("File not present in any level");
 }
 
+void VersionSet::GetCFRangeFilesMetaData(ColumnFamilyHandle* column_family, std::vector<LiveFileMetaData>* metadata,
+                                         const RangePtr* ranges,
+                                         size_t n, bool include_end) {
+  auto cfh = reinterpret_cast<ColumnFamilyHandleImpl*>(column_family);
+  ColumnFamilyData* cfd = cfh->cfd();
+  Version* input_version = cfd->current();
+  auto* vstorage = input_version->storage_info();
+  std::set<FileMetaData*> files;
+  for (size_t r = 0; r < n; r++) {
+    auto begin = ranges[r].start, end = ranges[r].limit;
+    for (int i = 1; i < cfd->NumberLevels(); i++) {
+      if (vstorage->LevelFiles(i).empty() ||
+          !vstorage->OverlapInLevel(i, begin, end)) {
+        continue;
+      }
+      std::vector<FileMetaData*> level_files;
+      InternalKey begin_storage, end_storage, *begin_key, *end_key;
+      if (begin == nullptr) {
+        begin_key = nullptr;
+      } else {
+        begin_storage.SetMinPossibleForUserKey(*begin);
+        begin_key = &begin_storage;
+      }
+      if (end == nullptr) {
+        end_key = nullptr;
+      } else {
+        end_storage.SetMaxPossibleForUserKey(*end);
+        end_key = &end_storage;
+      }
+
+      vstorage->GetCleanInputsWithinInterval(
+          i, begin_key, end_key, &level_files, -1 /* hint_index */,
+          nullptr /* file_index */);
+      FileMetaData* level_file;
+      for (uint32_t j = 0; j < level_files.size(); j++) {
+        level_file = level_files[j];
+        if (files.find(level_file) != files.end()) {
+          continue;
+        }
+        if (!include_end && end != nullptr &&
+            cfd->user_comparator()->Compare(level_file->largest.user_key(),
+                                            *end) == 0) {
+          continue;
+        }
+        files.insert(level_file);
+        LiveFileMetaData filemetadata;
+        filemetadata.column_family_name = cfd->GetName();
+        uint32_t path_id = level_file->fd.GetPathId();
+        if (path_id < cfd->ioptions()->cf_paths.size()) {
+          filemetadata.db_path = cfd->ioptions()->cf_paths[path_id].path;
+        } else {
+          assert(!cfd->ioptions()->cf_paths.empty());
+          filemetadata.db_path = cfd->ioptions()->cf_paths.back().path;
+        }
+        filemetadata.name = MakeTableFileName("", level_file->fd.GetNumber());
+        filemetadata.level = j;
+        filemetadata.size = static_cast<size_t>(level_file->fd.GetFileSize());
+        filemetadata.smallestkey = level_file->smallest.user_key().ToString();
+        filemetadata.largestkey = level_file->largest.user_key().ToString();
+        filemetadata.smallest_seqno = level_file->fd.smallest_seqno;
+        filemetadata.largest_seqno = level_file->fd.largest_seqno;
+        filemetadata.num_reads_sampled = level_file->stats.num_reads_sampled.load(
+            std::memory_order_relaxed);
+        filemetadata.being_compacted = level_file->being_compacted;
+        filemetadata.num_entries = level_file->num_entries;
+        filemetadata.num_deletions = level_file->num_deletions;
+        metadata->push_back(filemetadata);
+      }
+    }
+  }
+}
+
 void VersionSet::GetLiveFilesMetaData(std::vector<LiveFileMetaData>* metadata) {
   for (auto cfd : *column_family_set_) {
     if (cfd->IsDropped() || !cfd->initialized()) {

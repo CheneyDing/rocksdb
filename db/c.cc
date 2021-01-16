@@ -3709,33 +3709,15 @@ void rocksdb_delete_file_in_range_cf(
           (limit_key ? (b = Slice(limit_key, limit_key_len), &b) : nullptr)));
 }
 
-void rocksdb_find_file_in_range_cf(
-    rocksdb_t* db, rocksdb_column_family_handle_t* column_family,
+void rocksdb_get_cf_range_files_metadata(
+    rocksdb_t* db, rocksdb_column_family_handle_t* column_family, rocksdb_livefiles_t* files,
     const char* start_key, size_t start_key_len, const char* limit_key,
-    size_t limit_key_len, char* level_sst_files, char** errptr) {
+    size_t limit_key_len, char** errptr) {
   Slice a, b;
-  std::map<int, std::set<uint64_t>> files;
-  SaveError(
-      errptr,
-      FindFilesInRange(
-          db->rep, column_family->rep, &files,
-          (start_key ? (a = Slice(start_key, start_key_len), &a) : nullptr),
-          (limit_key ? (b = Slice(limit_key, limit_key_len), &b) : nullptr)));
-  std::map<int, std::set<uint64_t>>::iterator iter;
-  iter = files.begin();
-  int pos = 0;
-  while(iter != files.end()) {
-    level_sst_files[pos] = (int)iter->first;
-    pos += sizeof(int);
-    level_sst_files[pos] = (int)iter->second.size();
-    pos += sizeof(int);
-    std::set<uint64_t>::iterator iter2;
-    iter2 = iter->second.begin();
-    while(iter2 != iter->second.end()) {
-      level_sst_files[pos] = *iter2;
-      pos += sizeof(uint64_t);
-    }
-  }
+  GetCFFilesMetaInRange(
+      db->rep, column_family->rep, files,
+      (start_key ? (a = Slice(start_key, start_key_len), &a) : nullptr),
+      (limit_key ? (b = Slice(limit_key, limit_key_len), &b) : nullptr));
 }
 
 rocksdb_transactiondb_options_t* rocksdb_transactiondb_options_create() {

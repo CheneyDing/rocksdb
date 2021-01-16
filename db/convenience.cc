@@ -32,18 +32,18 @@ Status DeleteFilesInRanges(DB* db, ColumnFamilyHandle* column_family,
       ->DeleteFilesInRanges(column_family, ranges, n, include_end);
 }
 
-Status FindFilesInRange(DB* db, ColumnFamilyHandle* column_family, std::map<int, std::set<uint64_t>>* files,
+void GetCFFilesMetaInRange(DB* db, ColumnFamilyHandle* column_family, std::vector<LiveFileMetaData>* metadata,
                           const Slice* begin, const Slice* end,
                           bool include_end) {
   RangePtr range(begin, end);
-  return FindFilesInRanges(db, column_family, files, &range, 1, include_end);
+  GetCFFilesMetaInRanges(db, column_family, metadata, &range, 1, include_end);
 }
 
-Status FindFilesInRanges(DB* db, ColumnFamilyHandle* column_family, std::map<int, std::set<uint64_t>>* files,
-                         const RangePtr* ranges,
-                         size_t n, bool include_end) {
-  return (static_cast_with_check<DBImpl, DB>(db->GetRootDB()))
-      ->FindFilesInRanges(column_family, ranges, files, n, include_end);
+void GetCFFilesMetaInRanges(DB* db, ColumnFamilyHandle* column_family, std::vector<LiveFileMetaData>* metadata,
+                           const RangePtr* ranges, size_t n,
+                           bool include_end) {
+  (static_cast_with_check<DBImpl, DB>(db->GetRootDB()))
+      ->GetCFRangeFilesMetaData(column_family, metadata, ranges, n, include_end);
 }
 
 Status VerifySstFileChecksum(const Options& options,

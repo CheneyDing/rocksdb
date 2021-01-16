@@ -1003,6 +1003,10 @@ class VersionSet {
   // This function doesn't support leveldb SST filenames
   void GetLiveFilesMetaData(std::vector<LiveFileMetaData> *metadata);
 
+  void GetCFRangeFilesMetaData(ColumnFamilyHandle* column_family, std::vector<LiveFileMetaData>* metadata,
+                               const RangePtr* ranges,
+                               size_t n, bool include_end);
+
   void GetObsoleteFiles(std::vector<ObsoleteFileInfo>* files,
                         std::vector<std::string>* manifest_filenames,
                         uint64_t min_pending_output);
