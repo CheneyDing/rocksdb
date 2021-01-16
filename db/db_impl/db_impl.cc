@@ -3057,12 +3057,11 @@ Status DBImpl::DeleteFilesInRanges(ColumnFamilyHandle* column_family,
 }
 
 Status DBImpl::FindFilesInRanges(ColumnFamilyHandle* column_family,
-                                   const RangePtr* ranges, std::set<uint64_t>* files,
+                                   const RangePtr* ranges, std::map<int, std::set<uint64_t>>* files,
                                    size_t n, bool include_end) {
   Status status;
   auto cfh = reinterpret_cast<ColumnFamilyHandleImpl*>(column_family);
   ColumnFamilyData* cfd = cfh->cfd();
-  std::set<FileMetaData*> finded_files;
   Version* input_version = cfd->current();
   auto* vstorage = input_version->storage_info();
   for (size_t r = 0; r < n; r++) {
@@ -3091,9 +3090,10 @@ Status DBImpl::FindFilesInRanges(ColumnFamilyHandle* column_family,
           i, begin_key, end_key, &level_files, -1 /* hint_index */,
           nullptr /* file_index */);
       FileMetaData* level_file;
+      std::set<uint64_t> finded_level_files;
       for (uint32_t j = 0; j < level_files.size(); j++) {
         level_file = level_files[j];
-        if (files->find(level_file->fd.GetNumber()) != files->end()) {
+        if (finded_level_files.find(level_file->fd.GetNumber()) != finded_level_files.end()) {
           continue;
         }
         if (!include_end && end != nullptr &&
@@ -3101,8 +3101,9 @@ Status DBImpl::FindFilesInRanges(ColumnFamilyHandle* column_family,
                                             *end) == 0) {
           continue;
         }
-        files->insert(level_file->fd.GetNumber());
+        finded_level_files.insert(level_file->fd.GetNumber());
       }
+      files->insert(std::map<int, std::set<uint64_t>>::value_type(i, finded_level_files));
     }
   }
   return Status::OK();

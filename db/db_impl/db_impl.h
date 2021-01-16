@@ -336,7 +336,7 @@ class DBImpl : public DB {
                              const RangePtr* ranges, size_t n,
                              bool include_end = true);
   Status FindFilesInRanges(ColumnFamilyHandle* column_family,
-                                   const RangePtr* ranges, std::set<uint64_t>* files,
+                                   const RangePtr* ranges, std::map<int, std::set<uint64_t>>* files,
                                    size_t n, bool include_end);
 
   virtual void GetLiveFilesMetaData(
@@ -1931,6 +1931,9 @@ class DBImpl : public DB {
   InstrumentedCondVar atomic_flush_install_cv_;
 
   bool wal_in_db_path_;
+  Status FindFilesInRanges(ColumnFamilyHandle* column_family,
+                           const RangePtr* ranges, std::map<int>* files,
+                           size_t n, bool include_end);
 };
 
 extern Options SanitizeOptions(const std::string& db, const Options& src);

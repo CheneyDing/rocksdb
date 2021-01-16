@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <set>
 
 #include "rocksdb/db.h"
 #include "rocksdb/options.h"
@@ -334,6 +335,14 @@ Status DeleteFilesInRange(DB* db, ColumnFamilyHandle* column_family,
 Status DeleteFilesInRanges(DB* db, ColumnFamilyHandle* column_family,
                            const RangePtr* ranges, size_t n,
                            bool include_end = true);
+
+Status FindFilesInRange(DB* db, ColumnFamilyHandle* column_family,
+                        const Slice* begin, const Slice* end, std::map<int, std::set<uint64_t>>* files,
+                        bool include_end = true);
+
+Status FindFilesInRanges(DB* db, ColumnFamilyHandle* column_family,
+                         const RangePtr* ranges, std::map<int, std::set<uint64_t>>* files,
+                         size_t n, bool include_end = true);
 
 // Verify the checksum of file
 Status VerifySstFileChecksum(const Options& options,
