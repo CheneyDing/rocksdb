@@ -3719,6 +3719,10 @@ void rocksdb_get_cf_range_files_metadata(
       (limit_key ? (b = Slice(limit_key, limit_key_len), &b) : nullptr));
 }
 
+rocksdb_livefiles_t* rocksdb_livefiles_create() {
+  return new rocksdb_livefiles_t;
+}
+
 rocksdb_transactiondb_options_t* rocksdb_transactiondb_options_create() {
   return new rocksdb_transactiondb_options_t;
 }
