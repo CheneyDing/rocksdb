@@ -1487,7 +1487,7 @@ extern ROCKSDB_LIBRARY_API void rocksdb_delete_file_in_range_cf(
     const char* start_key, size_t start_key_len, const char* limit_key,
     size_t limit_key_len, char** errptr);
 
-extern ROCKSDB_LIBRARY_API void rocksdb_get_cf_range_files_metadata(
+extern ROCKSDB_LIBRARY_API const char* rocksdb_get_cf_range_files_metadata(
     rocksdb_t* db, rocksdb_column_family_handle_t* column_family, rocksdb_livefiles_t* metadata,
     const char* start_key, size_t start_key_len, const char* limit_key, size_t limit_key_len);
 

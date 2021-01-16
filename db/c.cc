@@ -3709,23 +3709,58 @@ void rocksdb_delete_file_in_range_cf(
           (limit_key ? (b = Slice(limit_key, limit_key_len), &b) : nullptr)));
 }
 
-void rocksdb_get_cf_range_files_metadata(
+const char* rocksdb_get_cf_range_files_metadata(
     rocksdb_t* db, rocksdb_column_family_handle_t* column_family, rocksdb_livefiles_t* metadata,
     const char* start_key, size_t start_key_len, const char* limit_key, size_t limit_key_len) {
   Slice a, b;
+  std::string meta;
   GetCFFilesMetaInRange(
-      db->rep, column_family->rep, &metadata->rep,
+      db->rep, column_family ? column_family->rep : db->rep->DefaultColumnFamily(), &metadata->rep,
       (start_key ? (a = Slice(start_key, start_key_len), &a) : nullptr),
       (limit_key ? (b = Slice(limit_key, limit_key_len), &b) : nullptr));
+  int pos = 0;
+  meta += "[";
+  std::string name = "\"name\":";
+  std::string start = "\"start_key\":";
+  std::string end = "\"end_key\":";
+  std::string level = "\"level\":";
+  for (auto iter = metadata->rep.begin(); iter != metadata->rep.end(); iter++) {
+    if (pos > 1) meta += ",";
+
+    meta += "{";
+
+    meta += name;
+    meta += "\"";
+    meta += (*iter).name;
+    meta += "\"";
+
+    meta += ",";
+
+    meta += start;
+    meta += "\"";
+    meta += (*iter).smallestkey;
+    meta += "\"";
+
+    meta += ",";
+
+    meta += end;
+    meta += "\"";
+    meta += (*iter).largestkey;
+    meta += "\"";
+
+    meta += ",";
+
+    meta += (*iter).level;
+
+    meta += "}";
+  }
+  meta += "]";
+  Slice result(meta);
+  return result.data();
 }
 
 rocksdb_livefiles_t* rocksdb_livefiles_create() {
   return new rocksdb_livefiles_t;
-}
-
-rocksdb_column_family_handle_t * rocksdb_default_column_family(rocksdb_t* db) {
-  return reinterpret_cast<rocksdb_column_family_handle_t*>(
-      db->rep->DefaultColumnFamily());
 }
 
 void rocksdb_parse_livefiles(rocksdb_livefiles_t* metadata) {
