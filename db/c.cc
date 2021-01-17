@@ -3718,45 +3718,36 @@ const char* rocksdb_get_cf_range_files_metadata(
       db->rep, column_family ? column_family->rep : db->rep->DefaultColumnFamily(), &metadata->rep,
       (start_key ? (a = Slice(start_key, start_key_len), &a) : nullptr),
       (limit_key ? (b = Slice(limit_key, limit_key_len), &b) : nullptr));
-  int pos = 0;
   meta += "[";
   std::string name = "\"name\":";
   std::string start = "\"start_key\":";
   std::string end = "\"end_key\":";
   std::string level = "\"level\":";
   for (auto iter = metadata->rep.begin(); iter != metadata->rep.end(); iter++) {
-    if (pos > 1) meta += ",";
-
     meta += "{";
-
     meta += name;
     meta += "\"";
     meta += (*iter).name;
     meta += "\"";
-
     meta += ",";
-
     meta += start;
     meta += "\"";
     meta += (*iter).smallestkey;
     meta += "\"";
-
     meta += ",";
-
     meta += end;
     meta += "\"";
     meta += (*iter).largestkey;
     meta += "\"";
-
     meta += ",";
-
-    meta += (*iter).level;
-
+    meta += level;
+    meta += std::to_string((*iter).level);
     meta += "}";
+    meta += ",";
   }
+  meta = meta.substr(0, meta.size() - 1);
   meta += "]";
   Slice result(meta);
-  std::cout << "meta: " << meta << std::endl;
   return result.data();
 }
 
