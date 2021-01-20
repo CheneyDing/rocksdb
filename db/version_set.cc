@@ -3233,6 +3233,7 @@ void VersionStorageInfo::CalculateBaseBytes(const ImmutableCFOptions& ioptions,
         // causes compaction scoring, which depends on level sizes, to favor L1+
         // at the expense of L0, which may fill up and stall.
         level_max_bytes_[i] = std::max(level_size, base_bytes_max);
+        ROCKS_LOG_INFO(ioptions.info_log, "Level: %d Max Bytes: %lld\n", i, level_max_bytes_[i]);
       }
     }
   }
