@@ -1996,6 +1996,9 @@ void Version::PrepareApply(
   UpdateAccumulatedStats(update_stats);
   storage_info_.UpdateNumNonEmptyLevels();
   storage_info_.CalculateBaseBytes(*cfd_->ioptions(), mutable_cf_options);
+  for (int i = 0; i < cfd_->ioptions()->num_levels; ++i) {
+    ROCKS_LOG_INFO(cfd_->ioptions()->info_log, "CF:%s Level: %d Max Bytes: %lu\n", cfd_->GetName().c_str(), i, storage_info_.MaxBytesForLevel(i));
+  }
   storage_info_.UpdateFilesByCompactionPri(cfd_->ioptions()->compaction_pri);
   storage_info_.GenerateFileIndexer();
   storage_info_.GenerateLevelFilesBrief();
@@ -3233,7 +3236,6 @@ void VersionStorageInfo::CalculateBaseBytes(const ImmutableCFOptions& ioptions,
         // causes compaction scoring, which depends on level sizes, to favor L1+
         // at the expense of L0, which may fill up and stall.
         level_max_bytes_[i] = std::max(level_size, base_bytes_max);
-        ROCKS_LOG_INFO(ioptions.info_log, "Level: %d Max Bytes: %lu\n", i, level_max_bytes_[i]);
       }
     }
   }
